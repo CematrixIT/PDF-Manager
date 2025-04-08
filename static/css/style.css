@@ -1,0 +1,813 @@
+:root {
+    --primary-color: #4361ee;
+    --secondary-color: #f8f9fa;
+    --accent-color: #3f37c9;
+    --danger-color: #ef476f;
+    --success-color: #06d6a0;
+    --text-color: #2b2d42;
+    --border-radius: 12px;
+    --sidebar-width: 280px;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height: 1.6;
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: var(--sidebar-width);
+    background: white;
+    padding: 20px;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    position: fixed;
+    height: 100vh;
+    left: 0;
+    top: 0;
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px 0;  /* 从20px改为15px */
+    border-bottom: 1px solid #eee;
+    margin-bottom: 15px;  /* 从20px改为15px */
+}
+
+.folder-form {
+    margin-top: 5px;  /* 从10px改为5px */
+}
+
+.folder-form .form-group {
+    display: flex;
+    gap: 0;
+    padding: 6px 15px;  /* 从8px改为6px */
+}
+
+.sidebar-header i {
+    font-size: 24px;
+    color: var(--primary-color);
+}
+
+.sidebar-header h1 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.main-content {
+    flex: 1;
+    padding: 40px;
+    margin-left: var(--sidebar-width);
+}
+
+.breadcrumb {
+    background: white;
+    padding: 15px 20px;
+    border-radius: var(--border-radius);
+    margin-bottom: 30px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.breadcrumb i {
+    color: var(--primary-color);
+    margin-right: 8px;
+}
+
+.file-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));  /* 从200px改为160px */
+    gap: 15px;  /* 从20px改为15px */
+    margin-top: 20px;
+}
+
+.file-card {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 12px;  /* 从15px改为12px */
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    height: 150px;  /* 从180px改为150px */
+    position: relative;
+}
+
+.file-icon {
+    font-size: 32px;  /* 从40px改为32px */
+    margin-bottom: 12px;  /* 从15px改为12px */
+}
+
+.file-name {
+    font-size: 13px;  /* 从14px改为13px */
+    line-height: 1.3;
+    max-height: 2.6em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    margin-bottom: 4px;  /* 从5px改为4px */
+}
+
+.file-actions {
+    position: absolute;
+    bottom: 12px;  /* 从15px改为12px */
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    justify-content: center;
+    gap: 6px;  /* 从8px改为6px */
+    opacity: 0;
+    transition: all 0.3s ease;
+    padding: 3px 6px;  /* 从4px 8px改为3px 6px */
+    min-width: 50px;  /* 从60px改为50px */
+}
+
+.set-time-btn, .delete-btn {
+    width: 28px;  /* 从32px改为28px */
+    height: 28px;  /* 从32px改为28px */
+}
+
+.set-time-btn i, .delete-btn i {
+    font-size: 14px;  /* 从16px改为14px */
+}
+
+/* 添加文件夹视图样式 */
+.folder-view {
+    width: 100%;
+}
+
+.folder-view .file-grid {
+    margin-top: 10px;
+}
+
+/* 隐藏非当前文件夹的内容 */
+.file-card.hidden {
+    display: none;
+}
+
+/* 当在文件夹视图时隐藏根目录内容 */
+.root-view.hidden {
+    display: none;
+}
+
+/* 面包屑导航样式优化 */
+.breadcrumb {
+    background: white;
+    padding: 15px 20px;
+    border-radius: var(--border-radius);
+    margin-bottom: 30px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.breadcrumb a {
+    color: var(--primary-color);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.breadcrumb .separator {
+    color: #666;
+    margin: 0 5px;
+}
+
+.file-card {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 15px;
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    height: 180px;
+    position: relative;  /* 为绝对定位提供参考 */
+}
+
+.file-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    margin-bottom: 35px;  /* 为按钮留出空间 */
+}
+
+.file-name {
+    font-size: 14px;
+    line-height: 1.3;
+    max-height: 2.6em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    margin-bottom: 5px;
+}
+
+.file-actions {
+    position: absolute;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    opacity: 0;
+    transition: all 0.3s ease;
+    padding: 4px 8px;
+    background: rgba(255, 255, 255, 0.3);  /* 降低不透明度 */
+    backdrop-filter: blur(2px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    border-radius: 20px;
+    width: auto;
+    min-width: 60px;
+}
+
+.set-time-btn, .delete-btn {
+    background: rgba(255, 255, 255, 0.3);  /* 降低按钮背景不透明度 */
+    border: none;
+    padding: 4px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+}
+
+.remaining-time {
+    font-size: 12px;
+    color: #666;
+    margin-top: 5px;
+    margin-bottom: 0;  /* 移除底部间距 */
+}
+
+.set-time-btn, .delete-btn {
+    background: rgba(255, 255, 255, 0.8);
+    border: none;
+    padding: 4px;  /* 减小内边距 */
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;  /* 调整按钮大小 */
+    height: 20px;
+}
+
+.set-time-btn i, .delete-btn i {
+    font-size: 12px;  /* 调整图标大小 */
+}
+
+/* 调整剩余时间的位置 */
+.remaining-time {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 45px;  /* 为按钮留出空间 */
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    justify-content: center;
+}
+
+.file-card:hover .file-actions {
+    opacity: 1;
+}
+
+/* 当只有一个按钮时的样式调整 */
+.file-actions:has(.delete-btn:only-child) {
+    padding: 8px 0;
+}
+.set-time-btn, .delete-btn {
+    background: rgba(255, 255, 255, 0.8);  /* 半透明按钮背景 */
+    border: none;
+    padding: 6px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+}
+
+.set-time-btn:hover {
+    background-color: rgba(67, 97, 238, 0.15);
+}
+
+.delete-btn:hover {
+    background-color: rgba(239, 71, 111, 0.15);
+}
+
+.remaining-time {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 30px;  /* 为按钮留出空间 */
+}
+
+.remaining-time {
+    font-size: 12px;
+    color: #666;
+    margin-top: auto;  /* 自动调整位置 */
+}
+
+.file-actions {
+    margin-top: 5px;  /* 减小上边距 */
+}
+
+.file-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.file-icon {
+    font-size: 40px;
+    margin-bottom: 15px;
+}
+
+.file-icon i {
+    color: var(--primary-color);
+}
+
+/* 为PDF图标添加特殊颜色 */
+.file-icon .fa-file-pdf {
+    color: #dc3545;  /* 使用红色 */
+}
+
+.file-info {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.file-name {
+    font-size: 14px;
+    word-break: break-word;
+}
+
+.file-actions {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 10px;
+    opacity: 0;  /* 默认隐藏 */
+    transition: opacity 0.2s ease;
+}
+
+.file-card:hover .file-actions {
+    opacity: 1;  /* 悬停时显示 */
+}
+
+.set-time-btn, .delete-btn {
+    background: none;
+    border: none;
+    padding: 6px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+}
+
+.set-time-btn {
+    color: var(--primary-color);
+}
+
+.set-time-btn:hover {
+    background-color: rgba(67, 97, 238, 0.1);
+}
+
+.delete-btn {
+    color: var(--danger-color);
+}
+
+.delete-btn:hover {
+    background-color: rgba(239, 71, 111, 0.1);
+}
+
+.set-time-btn i, .delete-btn i {
+    font-size: 16px;
+}
+
+.search-box {
+    position: relative;
+    margin: 20px 5px;  /* 从10px改为5px */
+}
+
+.search-box input {
+    width: 100%;
+    padding: 10px 35px 10px 8px;  /* 左内边距从12px改为8px */
+    border: 1px solid #e0e0e0;
+    border-radius: var(--border-radius);
+    font-size: 14px;
+}
+
+.folder-form {
+    margin-top: 5px;
+}
+
+.folder-form .form-group {
+    display: flex;
+    gap: 0;
+    padding: 6px 5px;  /* 从10px改为5px */
+}
+
+.folder-form input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px 0 0 4px;
+    font-size: 14px;
+}
+
+.folder-form button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 0 4px 4px 0;  /* 只保留右侧圆角 */
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.folder-form button:hover {
+    background-color: var(--accent-color);
+}
+
+.folder-form button i {
+    font-size: 14px;
+}
+
+input[type="text"] {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #eee;
+    border-radius: var(--border-radius);
+    font-size: 14px;
+}
+
+button {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    padding: 12px 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    background: var(--accent-color);
+}
+
+.upload-card {
+    position: fixed;
+    right: 40px;
+    bottom: 40px;  /* 从80px改为40px */
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    border: none;
+    box-shadow: 0 2px 8px rgba(67, 97, 238, 0.2);
+    margin: 0;
+    padding: 0;
+    z-index: 1000;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.upload-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+    background: var(--accent-color);
+}
+
+.upload-form {
+    width: 100%;
+    height: 100%;
+}
+
+.upload-label {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+/* 删除其他 hover 相关样式 */
+.upload-label i {
+    font-size: 22px;
+    color: white;
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+}
+
+/* 删除 .upload-label:hover 样式 */
+.upload-label:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 16px rgba(67, 97, 238, 0.4);
+    background: var(--accent-color);
+}
+
+.upload-label span {
+    display: none;
+}
+
+.delete-btn {
+    color: var(--danger-color);
+    text-decoration: none;
+    padding: 5px 10px;
+    border-radius: var(--border-radius);
+    transition: all 0.2s ease;
+}
+
+.delete-btn:hover {
+    background: #fff5f5;
+}
+
+.error {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #ffebee;
+    color: #c62828;
+    padding: 15px 20px;
+    border-radius: var(--border-radius);
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    animation: slideIn 0.3s ease;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1100;
+    max-width: 400px;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.close-error {
+    background: none;
+    border: none;
+    color: #c62828;
+    cursor: pointer;
+    padding: 8px;
+    margin-left: 15px;
+    transition: all 0.3s ease;
+    border-radius: 50%;
+}
+
+.close-error:hover {
+    background-color: rgba(198, 40, 40, 0.1);
+}
+    .search-box {
+        position: relative;
+        margin: 20px 15px;
+    }
+    
+    .search-box input {
+        width: 100%;
+        padding: 10px 35px 10px 15px;
+        border: 1px solid #e0e0e0;
+        border-radius: var(--border-radius);
+        font-size: 14px;
+        transition: border-color 0.3s;
+    }
+    
+    .search-box input:focus {
+        border-color: var(--primary-color);
+        outline: none;
+    }
+    
+    .search-box i {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #999;
+        font-size: 14px;
+    }
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    padding: 0;
+    font-size: 16px;
+}
+
+.close-error:hover {
+    color: #ff0000;
+}
+
+.footer {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    width: calc(100% - var(--sidebar-width));
+    padding: 15px;
+    text-align: center;
+    font-size: 14px;
+    color: #666;
+    background: var(--secondary-color);
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+    }
+    
+    .main-content {
+        margin-left: 0;
+        padding: 20px;
+    }
+    
+    .file-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+    
+    .footer {
+        width: 100%;
+    }
+}
+
+.folder-nav {
+    margin-top: 30px;
+}
+
+.folder-list {
+    list-style: none;
+    padding: 0;
+}
+
+.folder-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 15px;
+    color: var(--text-color);
+    text-decoration: none;
+    border-radius: var(--border-radius);
+    transition: all 0.3s ease;
+}
+
+.folder-nav-item:hover {
+    background-color: #f8f9ff;
+    color: var(--primary-color);
+}
+
+.folder-nav-item i {
+    color: var(--primary-color);
+    font-size: 16px;
+}
+
+.folder-nav-item.active {
+    background-color: #f0f7ff;
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+}
+
+.time-inputs {
+    display: flex;
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.time-input-group {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.time-input-group input {
+    width: 70px;
+    padding: 8px;
+    border: 1px solid #eee;
+    border-radius: var(--border-radius);
+    font-size: 14px;
+}
+
+.time-input-group label {
+    color: var(--text-color);
+    font-size: 14px;
+}
+
+.modal-content {
+    background: white;
+    padding: 25px;
+    border-radius: var(--border-radius);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    min-width: 350px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.modal-buttons button {
+    padding: 8px 20px;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.modal-buttons .cancel-btn {
+    background: #f5f5f5;
+    color: var(--text-color);
+    border: 1px solid #eee;
+}
+
+.modal-buttons .cancel-btn:hover {
+    background: #ebebeb;
+}
+
+.modal-buttons .confirm-btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+}
+
+.modal-buttons .confirm-btn:hover {
+    background: var(--accent-color);
+}
+
+.set-time-btn {
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: var(--border-radius);
+}
+
+.set-time-btn:hover {
+    background: #f0f7ff;
+}
+
+.remaining-time {
+    font-size: 12px;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    justify-content: center;
+}
+
+.remaining-time i {
+    font-size: 12px;
+    color: var(--primary-color);

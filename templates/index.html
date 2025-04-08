@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title>PDF管理系统</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="PDF文档管理系统 - 轻松管理和查看PDF文件">
+    <meta name="keywords" content="PDF, 文档管理, 文件管理">
+    <meta name="theme-color" content="#4a90e2">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/apple-touch-icon.png') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/user-mode.css') }}">
+</head>
+<body>
+    <!-- 在最上面添加模式切换按钮 -->
+    <div class="user-mode-switch">
+        <div class="mode-indicator">
+            <i class="fas fa-user"></i>
+            <span class="mode-text">Guest Mode</span>
+        </div>
+        <button class="switch-button" onclick="toggleUserMode()">Switch to Admin</button>
+    </div>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-file-pdf"></i>
+            <h1>PDF Manager</h1>
+        </div>
+        <div class="sidebar-content">
+            <!-- 添加搜索框 -->
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search files and folders...">
+                <i class="fas fa-search"></i>
+            </div>
+            <!-- 原有的表单 -->
+            <form method="post" action="/create_folder" class="folder-form">
+                <div class="form-group">
+                    <input type="text" name="folder_name" placeholder="New folder..." required>
+                    <button type="submit"><i class="fas fa-plus"></i></button>
+                </div>
+            </form>
+            <nav class="folder-nav">
+                <ul class="folder-list">
+                    <li>
+                        <a href="{{ url_for('index') }}" class="folder-nav-item">
+                            <i class="fas fa-home"></i> Home
+                        </a>
+                    </li>
+                    {% for item in items %}
+                        {% if item.is_dir %}
+                        <li>
+                            <a href="{{ url_for('index', folder_path=item.path) }}" class="folder-nav-item">
+                                <i class="fas fa-folder"></i> {{ item.name }}
+                            </a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <div class="main-content">
+        {% if error %}
+        <div class="error">
+            {{ error }}
+            <button class="close-error" onclick="closeError(this)">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        {% endif %}
+
+        <div class="breadcrumb">
+            {% if current_path %}
+                <i class="fas fa-home"></i> / {{ current_path }}
+            {% else %}
+                <i class="fas fa-home"></i> Home Directory
+            {% endif %}
+        </div>
+
+        <div class="file-grid">
+            {% for item in items %}
+            <div class="file-card">
+                <div class="file-icon">
+                    {% if item.is_dir %}
+                        <a href="{{ url_for('index', folder_path=item.path) }}" class="folder-link">
+                            <i class="fas fa-folder"></i>
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('view_pdf', filename=item.path) }}" 
+                           class="file-link" 
+                           target="_blank">
+                            <i class="fas fa-file-pdf"></i>
+                        </a>
+                    {% endif %}
+                </div>
+                <div class="file-info">
+                    <span class="file-name">{{ item.name }}</span>
+                    {% if item.remaining_time %}
+                        <span class="remaining-time">
+                            <i class="fas fa-clock"></i> 剩余: {{ item.remaining_time }}
+                        </span>
+                    {% endif %}
+                    {% if item.name != '..' %}
+                    <div class="file-actions">
+                        {% if not item.remaining_time %}
+                            <button class="set-time-btn" onclick="showTimeDialog({{ item.id if item.id else 'null' }}, '{{ item.path }}', {{ 'true' if item.is_dir else 'false' }})">
+                                <i class="fas fa-clock"></i>
+                            </button>
+                        {% endif %}
+                        <a href="{{ url_for('delete_item', item_name=item.path) }}" 
+                           class="delete-btn"
+                           onclick="return confirm('确定要删除 {{ item.name }} 吗？')">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+            
+            <div class="file-card upload-card">
+                <form method="post" enctype="multipart/form-data" action="{{ url_for('upload_file', current_path=current_path) }}" class="upload-form" id="uploadForm">
+                    <input type="file" name="file" accept=".pdf" id="file-input" style="display: none;">
+                    <label for="file-input" class="upload-label">
+                        <i class="fas fa-plus"></i>
+                    </label>
+                </form>
+            </div>
+            
+            <footer class="footer">
+        <div class="container">
+            <p>© 2025 CEMATRIX IT</p>
+        </div>
+    </footer>
+
+    <script>
+    function showError(message) {
+        // 创建错误提示元素
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error';
+        errorDiv.innerHTML = `
+            ${message}
+            <button class="close-error" onclick="closeError(this)">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        
+        // 添加到主内容区域
+        document.querySelector('.main-content').insertBefore(errorDiv, document.querySelector('.main-content').firstChild);
+    }
+
+    document.getElementById('file-input').addEventListener('change', async function(e) {
+        if (this.files.length > 0) {
+            const fileName = this.files[0].name;
+            const existingFiles = Array.from(document.querySelectorAll('.file-name')).map(el => el.textContent);
+            
+            if (existingFiles.includes(fileName)) {
+                e.preventDefault();
+                showError(`文件 "${fileName}" 已存在！`);
+                this.value = ''; // 清空选择
+                return;
+            }
+            this.form.submit();
+        }
+    });
+    </script>
+
+    <!-- 在 body 标签结束前添加 -->
+    <!-- 修改时间设置对话框 -->
+    <div id="timeDialog" class="modal">
+        <div class="modal-content">
+            <div class="time-inputs">
+                <div class="time-input-group">
+                    <input type="number" id="daysInput" min="0" placeholder="天数">
+                    <label>天</label>
+                </div>
+                <div class="time-input-group">
+                    <input type="number" id="hoursInput" min="0" max="23" placeholder="小时">
+                    <label>时</label>
+                </div>
+                <div class="time-input-group">
+                    <input type="number" id="minutesInput" min="0" max="59" placeholder="分钟">
+                    <label>分</label>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button class="cancel-btn" onclick="closeTimeDialog()">取消</button>
+                <button class="confirm-btn" onclick="setExpireTime()">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    let currentFileId = null;
+let currentPath = null;
+let isDirectory = false;
+
+function closeTimeDialog() {
+    document.getElementById('timeDialog').style.display = 'none';
+    // 清空输入框的值
+    document.getElementById('daysInput').value = '';
+    document.getElementById('hoursInput').value = '';
+    document.getElementById('minutesInput').value = '';
+}
+
+function showTimeDialog(fileId, path, isDir) {
+    currentFileId = fileId;
+    currentPath = path;
+    isDirectory = isDir;
+    document.getElementById('timeDialog').style.display = 'block';
+}
+
+function setExpireTime() {
+    const days = parseInt(document.getElementById('daysInput').value) || 0;
+    const hours = parseInt(document.getElementById('hoursInput').value) || 0;
+    const minutes = parseInt(document.getElementById('minutesInput').value) || 0;
+
+    const totalMinutes = days * 24 * 60 + hours * 60 + minutes;
+    
+    if (totalMinutes <= 0) {
+        alert('请至少设置1分钟的时间');
+        return;
+    }
+
+    const url = isDirectory ? '/set_folder_expire_time' : `/set_expire_time/${currentFileId}`;
+    const data = isDirectory ? 
+        { path: currentPath, minutes: totalMinutes } : 
+        { minutes: totalMinutes };
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+    closeTimeDialog();
+}
+
+    function closeError(button) {
+        const errorDiv = button.parentElement;
+        errorDiv.style.opacity = '0';
+        errorDiv.style.transition = 'opacity 0.3s';
+        setTimeout(() => {
+            errorDiv.style.display = 'none';
+        }, 300);
+    }
+    </script>
+    <script>
+    // 在已有的脚本后面添加
+    function searchFiles() {
+        const searchText = document.getElementById('searchInput').value.toLowerCase();
+        const fileCards = document.querySelectorAll('.file-card');
+        
+        fileCards.forEach(card => {
+            if (card.classList.contains('upload-card')) return; // 跳过上传按钮
+            
+            const fileName = card.querySelector('.file-name').textContent.toLowerCase();
+            if (fileName === '..') return; // 跳过返回上级目录
+            
+            if (searchText === '' || fileName.includes(searchText)) {
+                card.style.display = '';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+
+    document.getElementById('searchInput').addEventListener('input', searchFiles);
+    </script>
+    <!-- 在body结束标签前添加script引用 -->
+    <script src="{{ url_for('static', filename='js/user-mode.js') }}"></script>
+</body>
+</html>
